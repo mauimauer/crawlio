@@ -106,15 +106,17 @@ function checkShortlink(client, shortLink) {
 			shortUrl: "http://"+shortLink,
 			projection: "ANALYTICS_CLICKS"
 		};
-		var req = client.urlshortener.url.get(params);
+		var req = client.urlshortener.url.get(params).withApiKey(API_KEY);
 		req.execute(function(err, response) {
 			if(err) {
 				console.log("checkShortlink failed");
+				console.log(err);
+				delete checkShortlink[shortLink];
 			} else {
 				if(response.longUrl.indexOf("redeem") != -1 && response.analytics.allTime.shortUrlClicks < 5) {
 					console.log(response.analytics.allTime.shortUrlClicks + ": "+shortLink + " -> "+ response.longUrl);
 				} else {
-					console.log(shortLink + " is stale");
+					console.log(shortLink + " is stale, views: "+ response.analytics.allTime.shortUrlClicks);
 				}
 			}
 		});
