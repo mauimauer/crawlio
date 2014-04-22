@@ -5,8 +5,6 @@
   "dependencies": {
 	"superagent": "*",
 	"moment": "*",
-	"googleapis": "*",
-	"cheerio": "*",
-	"burrito": "*"
+	"googleapis": "*"
   }
 }
