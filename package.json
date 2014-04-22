@@ -1,0 +1,12 @@
+{
+  "name": "crawlio",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+	"superagent": "*",
+	"moment": "*",
+	"googleapis": "*",
+	"cheerio": "*",
+	"burrito": "*"
+  }
+}
