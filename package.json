@@ -5,6 +5,7 @@
   "dependencies": {
 	"superagent": "*",
 	"moment": "*",
-	"googleapis": "*"
+	"googleapis": "*",
+	"timequeue": "*"
   }
 }

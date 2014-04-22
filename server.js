@@ -1,9 +1,10 @@
 var googleapis = require('googleapis'),
-	request = require('superagent');
+	request = require('superagent'),
+	TimeQueue = require('timequeue');
 
 var checkedVideos = {};
 var checkedShortlinks = {};
-var API_KEY = "your api key here"; // make sure it's enabled for YT and ShortLink APIs
+var API_KEY = "api key here";
 
 // Google Developers, Android Developers,
 // Google, Talks at Google, Chrome, Fiber,
@@ -41,14 +42,34 @@ var channels = [ 'UCVHFbqXqoYvEWM1Ddxl0QDg',
 var processedShortLinks = 0;
 var processedVideos = 0;
 
+var client = null;
+
 googleapis
 	.discover('urlshortener', 'v1')
 	.discover('youtube', 'v3')
-	.execute(function(err, client) {
-		if(!err && client) {
+	.execute(function(err, cl) {
+		if(!err && cl) {
+			client = cl;
 			crawlVideos(client);
 		}
 	});
+
+
+function worker(type, arg1, arg2, arg3, callback) {
+	if(type == "browse") {
+		if(arg2) {
+			browsePlaylist(client, arg1, arg2, callback);
+		} else {
+			browsePlaylist(client, arg1, null, callback);
+		}
+	} else if(type == "video") {
+		checkVideo(client, arg1, callback);
+	} else if(type == "shortlink") {
+		checkShortlink(client, arg1, callback);
+	}
+}
+var q = new TimeQueue(worker, { concurrency: 1, every: 1000 });
+
 
 function crawlVideos(client) {
 	for(var i = 0; i < channels.length; i++) {
@@ -63,14 +84,14 @@ function crawlVideos(client) {
 			if(response) {
 				var uploadsList = response.items[0].contentDetails.relatedPlaylists.uploads;
 				if(uploadsList) {
-					browsePlaylist(client, uploadsList, null);
+					q.push("browse", uploadsList);
 				}
 			}
 		});
 	};
 }
 
-function browsePlaylist(client, playlistId, pageToken) {
+function browsePlaylist(client, playlistId, pageToken, callback) {
 	var params = {
 		part: "id,contentDetails",
 		playlistId: playlistId,
@@ -87,16 +108,17 @@ function browsePlaylist(client, playlistId, pageToken) {
 		for(var i = 0; i < response.items.length; i++) {
 			var videoId = response.items[i].contentDetails.videoId;
 
-			checkVideo(client, videoId);
+			q.push("video", videoId);
 		}
 
 		if(response.nextPageToken) {
-			browsePlaylist(client, playlistId, response.nextPageToken);
+			q.push("browse", playlistId, response.nextPageToken);
 		}
+		callback();
 	});
 }
 
-function checkVideo(client, videoId) {
+function checkVideo(client, videoId, callback) {
 	processedVideos++;
 	if(!checkedVideos[videoId]) {
 		checkedVideos[videoId] = 1;
@@ -106,14 +128,15 @@ function checkVideo(client, videoId) {
 
 			if(matches) {
 				for(var i = 0; i < matches.length; i++) {
-					checkShortlink(client, matches[0]);
+					q.push("shortlink", matches[0]);
 				}
 			}
 		});
 	}
+	callback();
 }
 
-function checkShortlink(client, shortLink) {
+function checkShortlink(client, shortLink, callback) {
 	processedShortLinks++;
 	if(!checkShortlink[shortLink]) {
 		checkShortlink[shortLink] = 1;
@@ -139,4 +162,5 @@ function checkShortlink(client, shortLink) {
 			}
 		});
 	}
+	callback();
 }
