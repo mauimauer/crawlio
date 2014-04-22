@@ -3,7 +3,7 @@ var googleapis = require('googleapis'),
 
 var checkedVideos = {};
 var checkedShortlinks = {};
-var API_KEY = "your api key here";
+var API_KEY = "your api key here"; // make sure it's enabled for YT and ShortLink APIs
 
 // Google Developers, Android Developers,
 // Google, Talks at Google, Chrome, Fiber,
@@ -27,6 +27,9 @@ var channels = [ 'UCVHFbqXqoYvEWM1Ddxl0QDg',
 	'UCWf2ZlNsCGDS89VBF_awNvA',
 	'UCfhRDfX2gPf8kz52pLGpcgQ'];
 
+var processedShortLinks = 0;
+var processedVideos = 0;
+
 googleapis
 	.discover('urlshortener', 'v1')
 	.discover('youtube', 'v3')
@@ -37,7 +40,8 @@ googleapis
 	});
 
 function crawlVideos(client) {
-	channels.forEach(function(channel) {
+	for(var i = 0; i < channels.length; i++) {
+		var channel = channels[i];
 		var params = {
 			id: channel,
 			part: "id,contentDetails"
@@ -52,7 +56,7 @@ function crawlVideos(client) {
 				}
 			}
 		});
-	})
+	};
 }
 
 function browsePlaylist(client, playlistId, pageToken) {
@@ -82,6 +86,7 @@ function browsePlaylist(client, playlistId, pageToken) {
 }
 
 function checkVideo(client, videoId) {
+	processedVideos++;
 	if(!checkedVideos[videoId]) {
 		checkedVideos[videoId] = 1;
 		request.get("https://www.youtube.com/annotations_invideo?features=1&legacy=1&video_id="+videoId, function(res) {
@@ -98,7 +103,7 @@ function checkVideo(client, videoId) {
 }
 
 function checkShortlink(client, shortLink) {
-
+	processedShortLinks++;
 	if(!checkShortlink[shortLink]) {
 		checkShortlink[shortLink] = 1;
 
@@ -113,10 +118,12 @@ function checkShortlink(client, shortLink) {
 				console.log(err);
 				delete checkShortlink[shortLink];
 			} else {
-				if(response.longUrl.indexOf("redeem") != -1 && response.analytics.allTime.shortUrlClicks < 5) {
-					console.log(response.analytics.allTime.shortUrlClicks + ": "+shortLink + " -> "+ response.longUrl);
-				} else {
-					console.log(shortLink + " is stale, views: "+ response.analytics.allTime.shortUrlClicks);
+				if(response.longUrl.indexOf("redeem") != -1) {
+					if(response.analytics.allTime.shortUrlClicks < 5) {
+						console.log(response.analytics.allTime.shortUrlClicks + ": "+shortLink + " -> "+ response.longUrl);
+					} else {
+						console.log("redeem, "+ shortLink + " is stale, views: "+ response.analytics.allTime.shortUrlClicks);
+					}
 				}
 			}
 		});
