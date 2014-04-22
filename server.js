@@ -25,7 +25,18 @@ var channels = [ 'UCVHFbqXqoYvEWM1Ddxl0QDg',
 	'UCvceBgMIpKb4zK1ss-Sh90w',
 	'UCgl9rHdm9KojNRWs56QI_hg',
 	'UCWf2ZlNsCGDS89VBF_awNvA',
-	'UCfhRDfX2gPf8kz52pLGpcgQ'];
+	'UCfhRDfX2gPf8kz52pLGpcgQ',
+	'UC6fUahKiPDn1-3476TU-ovA',
+	'UCt84aUC9OG6di8kSdKzEHTQ',
+	'UCTnRxVUPssiL7H29ON07t_Q',
+	'UCtyYTpFBzWdoSFx2Gl2VNbQ',
+	'UCc688n0naRh68-n5LSiVNFA',
+	'UC51bU7uJjsdcIEUzY1HHZsA',
+	'UCBmwzQnSoj9b6HzNmFrg_yw',
+	'UCUjlPym2cxucUVPdE8kYOOg',
+	'UCWZeRDL6a3QTAd1FSz3Tmjg',
+	'UC0_ALFRaovsmae1Y8bILisQ',
+	'UCnIQPPwWpO_EFEqLny6TFTw'];
 
 var processedShortLinks = 0;
 var processedVideos = 0;
