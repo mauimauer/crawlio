@@ -81,11 +81,13 @@ function crawlVideos(client) {
 		var req = client.youtube.channels.list(params).withApiKey(API_KEY);
 		req.execute(function(err, response) {
 
-			if(response) {
+			if(!err && response) {
 				var uploadsList = response.items[0].contentDetails.relatedPlaylists.uploads;
 				if(uploadsList) {
 					q.push("browse", uploadsList);
 				}
+			} else {
+				console.log("crawlVideos failed");
 			}
 		});
 	};
@@ -105,14 +107,18 @@ function browsePlaylist(client, playlistId, pageToken, callback) {
 	var req = client.youtube.playlistItems.list(params).withApiKey(API_KEY);
 	req.execute(function(err, response) {
 
-		for(var i = 0; i < response.items.length; i++) {
-			var videoId = response.items[i].contentDetails.videoId;
+		if(err) {
+			console.log("browsePlaylist failed");
+		} else {
+			for(var i = 0; i < response.items.length; i++) {
+				var videoId = response.items[i].contentDetails.videoId;
 
-			q.push("video", videoId);
-		}
+				q.push("video", videoId);
+			}
 
-		if(response.nextPageToken) {
-			q.push("browse", playlistId, response.nextPageToken);
+			if(response.nextPageToken) {
+				q.push("browse", playlistId, response.nextPageToken);
+			}
 		}
 		callback();
 	});
