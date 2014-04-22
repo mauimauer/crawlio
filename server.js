@@ -88,6 +88,7 @@ function crawlVideos(client) {
 				}
 			} else {
 				console.log("crawlVideos failed");
+				console.log(err);
 			}
 		});
 	};
@@ -109,6 +110,7 @@ function browsePlaylist(client, playlistId, pageToken, callback) {
 
 		if(err) {
 			console.log("browsePlaylist failed");
+			console.log(err);
 		} else {
 			for(var i = 0; i < response.items.length; i++) {
 				var videoId = response.items[i].contentDetails.videoId;
